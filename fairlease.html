@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FairLease — Know What You're Signing</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+:root {
+  --sage:        #4A7C59;
+  --sage-light:  #EAF2ED;
+  --sage-mid:    #C3DACC;
+  --sage-dark:   #2E5C3F;
+  --cream:       #FAF8F3;
+  --parchment:   #F0EBE1;
+  --text:        #1C1C1A;
+  --text2:       #5C5A56;
+  --text3:       #9E9B96;
+  --border:      #E2DDD6;
+  --border2:     #C8C3BB;
+  --red:         #C0392B;
+  --red-light:   #FDECEA;
+  --amber:       #D4820A;
+  --amber-light: #FEF4E4;
+  --shadow-sm:   0 1px 4px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.10);
+  --shadow-lg:   0 12px 48px rgba(0,0,0,0.16);
+  --radius:      12px;
+  --radius-lg:   18px;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  display: flex; flex-direction: column;
+  height: 100vh;
+}
+
+/* ── NAV ── */
+.nav {
+  height: 58px; background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 2rem; gap: 1rem;
+  flex-shrink: 0; z-index: 10;
+}
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 600;
+  color: var(--sage-dark);
+  display: flex; align-items: center; gap: 8px;
+  letter-spacing: -0.01em; flex-shrink: 0;
+}
+.logo-icon {
+  width: 30px; height: 30px; background: var(--sage);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+}
+.logo-icon svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2; }
+.nav-spacer { flex: 1; }
+
+
+/* ── HERO ── */
+.hero {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem; background: var(--cream);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle, var(--sage-mid) 1px, transparent 1px);
+  background-size: 28px 28px; opacity: 0.18; pointer-events: none;
+}
+.hero-content {
+  position: relative; text-align: center; max-width: 560px;
+  animation: riseIn 0.7s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-eyebrow {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--sage); margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; display: inline-block; width: 24px; height: 1px; background: var(--sage-mid);
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(38px, 5vw, 58px); font-weight: 600;
+  line-height: 1.1; color: var(--text); margin-bottom: 14px; letter-spacing: -0.02em;
+}
+.hero-title span { color: var(--sage); font-style: italic; }
+.hero-sub {
+  font-size: 15px; font-weight: 300; color: var(--text2);
+  line-height: 1.6; margin-bottom: 36px; max-width: 420px;
+  margin-left: auto; margin-right: auto;
+}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone {
+  border: 1.5px dashed var(--border2); border-radius: var(--radius-lg);
+  padding: 32px 40px; background: white; cursor: pointer;
+  transition: all 0.2s; display: flex; flex-direction: column;
+  align-items: center; gap: 10px; box-shadow: var(--shadow-sm);
+  max-width: 420px; margin: 0 auto;
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--sage); background: var(--sage-light);
+  box-shadow: 0 0 0 4px var(--sage-light); transform: translateY(-2px);
+}
+.upload-icon {
+  width: 52px; height: 52px; background: var(--sage-light);
+  border-radius: 14px; display: flex; align-items: center; justify-content: center;
+}
+.upload-icon svg { width: 24px; height: 24px; fill: none; stroke: var(--sage); stroke-width: 1.8; }
+.upload-label { font-size: 15px; font-weight: 500; color: var(--text); }
+.upload-sub { font-size: 12px; color: var(--text3); }
+.upload-chips { display: flex; gap: 6px; margin-top: 4px; }
+.upload-chip {
+  font-size: 11px; padding: 3px 9px; border-radius: 20px;
+  background: var(--parchment); color: var(--text2); border: 1px solid var(--border);
+}
+input[type="file"] { display: none; }
+
+.lang-caret {
+  font-size: 10px; color: var(--text3);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+  to   { opacity: 1; transform: translateY(0); }
+
+/* ── FOOTER ── */
+.footer {
+  height: 38px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text3); flex-shrink: 0;
+}
+
+/* ── MODAL OVERLAY ── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(20,20,18,0.55); backdrop-filter: blur(3px);
+  z-index: 200; align-items: stretch; justify-content: center;
+}
+.overlay.open { display: flex; }
+
+.modal {
+  background: var(--cream); width: 100%; max-width: 820px;
+  margin: 20px auto; border-radius: var(--radius-lg);
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Modal header */
+.modal-header {
+  background: var(--sage-dark); padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.modal-header-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; font-weight: 600; color: white;
+}
+.modal-doc-info {
+  flex: 1; font-size: 12px; color: rgba(255,255,255,0.7);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Language switcher INSIDE modal header */
+.modal-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 16px; transition: background 0.15s; flex-shrink: 0;
+}
+.modal-close:hover { background: rgba(255,255,255,0.25); }
+
+/* Verdict bar */
+.verdict-bar {
+  background: var(--parchment); border-bottom: 1px solid var(--border);
+  padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.verdict-badge {
+  font-size: 13px; font-weight: 500; padding: 5px 14px;
+  border-radius: 20px; flex-shrink: 0;
+}
+.verdict-fair  { background: var(--sage-light); color: var(--sage-dark); }
+.verdict-mixed { background: var(--amber-light); color: var(--amber); }
+.verdict-risky { background: var(--red-light); color: var(--red); }
+.verdict-text  { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.verdict-dates { margin-left: auto; font-size: 11px; color: var(--text3); text-align: right; flex-shrink: 0; }
+
+/* Modal body */
+.modal-body { flex: 1; overflow: hidden; position: relative; }
+
+/* Clauses panel — full width now */
+.clauses-panel {
+  height: 100%; overflow-y: auto;
+  padding: 16px 20px; display: flex; flex-direction: column; gap: 12px;
+  background: var(--cream);
+}
+
+/* Loading */
+.loading-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 14px; padding: 4rem;
+  color: var(--text2); height: 100%;
+}
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--sage-mid); border-top-color: var(--sage);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-label { font-size: 15px; color: var(--text2); font-weight: 500; }
+.loading-sub { font-size: 12px; color: var(--text3); }
+
+/* ── CLAUSE CARD — simplified readable layout ── */
+.clause-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px;
+  animation: cardIn 0.3s ease both;
+  border-left: 4px solid var(--border2);
+}
+.clause-card.risk-high  { border-left-color: var(--red); }
+.clause-card.risk-watch { border-left-color: var(--amber); }
+.clause-card.risk-good  { border-left-color: var(--sage); }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.clause-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.severity-pill {
+  font-size: 11px; font-weight: 500;
+  padding: 3px 10px; border-radius: 20px; flex-shrink: 0;
+}
+.pill-high  { background: var(--red-light);   color: var(--red); }
+.pill-watch { background: var(--amber-light);  color: var(--amber); }
+.pill-good  { background: var(--sage-light);   color: var(--sage-dark); }
+.clause-title { font-size: 15px; font-weight: 500; }
+
+/* The "what this means" box — big, clear, simple */
+.clause-meaning {
+  background: var(--parchment); border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 10px;
+}
+.clause-meaning-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 5px;
+}
+.clause-meaning-text {
+  font-size: 15px; font-weight: 400; color: var(--text);
+  line-height: 1.65;
+}
+
+/* Impact line — one sentence, what does it mean FOR ME */
+.clause-impact {
+  font-size: 13px; color: var(--text2); line-height: 1.55;
+  margin-bottom: 10px; display: flex; align-items: flex-start; gap: 6px;
+}
+.clause-impact-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
+/* Normalcy bar */
+.normalcy-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.normalcy-label { font-size: 11px; color: var(--text3); white-space: nowrap; }
+.bar-track { flex: 1; height: 4px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 3px; transition: width 0.9s ease; }
+.normalcy-pct { font-size: 11px; color: var(--text3); min-width: 30px; text-align: right; }
+
+/* Tip */
+.clause-tip {
+  font-size: 12px; color: var(--sage-dark);
+  background: var(--sage-light); border-radius: 8px;
+  padding: 8px 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.5;
+}
+.clause-tip-icon { flex-shrink: 0; }
+
+/* ── FLOATING CHAT BUBBLE ── */
+.chat-bubble-btn {
+  position: fixed; bottom: 28px; right: 28px;
+  width: 54px; height: 54px; border-radius: 50%;
+  background: var(--sage); border: none; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(74,124,89,0.45);
+  display: none; align-items: center; justify-content: center;
+  z-index: 500; transition: transform 0.15s, background 0.15s;
+}
+.chat-bubble-btn.visible { display: flex; }
+.chat-bubble-btn:hover { background: var(--sage-dark); transform: scale(1.06); }
+.chat-bubble-btn svg { width: 24px; height: 24px; fill: none; stroke: white; stroke-width: 2; }
+
+/* Notification dot */
+.chat-notif {
+  position: absolute; top: 2px; right: 2px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #E74C3C; border: 2px solid white;
+  display: none;
+}
+.chat-notif.show { display: block; }
+
+/* ── CHAT WINDOW (floating, bottom-right) ── */
+.chat-window {
+  position: fixed; bottom: 96px; right: 28px;
+  width: 340px; height: 480px;
+  background: white; border-radius: var(--radius-lg);
+  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+  display: none; flex-direction: column; z-index: 499;
+  overflow: hidden;
+  animation: chatSlideIn 0.25s cubic-bezier(0.22,1,0.36,1) both;
+}
+.chat-window.open { display: flex; }
+@keyframes chatSlideIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chat-win-header {
+  background: var(--sage-dark); padding: 12px 16px;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.chat-win-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #5EE89A;
+  animation: pulse 2s infinite; flex-shrink: 0;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.8)} }
+.chat-win-title { font-size: 14px; font-weight: 500; color: white; flex: 1; }
+.chat-win-close {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+  color: white; font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.chat-win-close:hover { background: rgba(255,255,255,0.25); }
+
+.chat-msgs {
+  flex: 1; overflow-y: auto; padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--cream);
+}
+.msg {
+  font-size: 13px; line-height: 1.55;
+  padding: 9px 12px; border-radius: 14px; max-width: 88%;
+  animation: msgIn 0.2s ease;
+}
+@keyframes msgIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.msg-ai   { background: white; color: var(--text); align-self: flex-start; border-bottom-left-radius: 3px; border: 1px solid var(--border); }
+.msg-user { background: var(--sage); color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
+.msg-err  { background: var(--red-light); color: var(--red); align-self: flex-start; font-size: 12px; }
+
+.typing {
+  display: flex; gap: 4px; align-items: center;
+  padding: 10px 13px; border-radius: 14px; border-bottom-left-radius: 3px;
+  background: white; align-self: flex-start; border: 1px solid var(--border);
+}
+.typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sage); animation: tdot 1.2s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes tdot { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-4px);opacity:1} }
+
+.chat-chips {
+  padding: 8px 10px 4px; display: flex; flex-direction: column; gap: 5px;
+  border-top: 1px solid var(--border); flex-shrink: 0; background: white;
+}
+.chat-chip {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: left;
+  padding: 7px 11px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--parchment); color: var(--text2); cursor: pointer; transition: all 0.15s;
+}
+.chat-chip:hover { border-color: var(--sage); color: var(--sage-dark); background: var(--sage-light); }
+.chat-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.chat-input-row {
+  padding: 8px 10px; border-top: 1px solid var(--border);
+  display: flex; gap: 7px; align-items: center;
+  flex-shrink: 0; background: white;
+}
+.chat-input {
+  flex: 1; font-family: 'DM Sans', sans-serif; font-size: 13px;
+  padding: 8px 12px; border: 1px solid var(--border2); border-radius: 20px;
+  background: var(--parchment); color: var(--text); outline: none; transition: border-color 0.15s;
+}
+.chat-input:focus { border-color: var(--sage); }
+.chat-input::placeholder { color: var(--text3); }
+.chat-input:disabled { opacity: 0.5; }
+.chat-send {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--sage); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background 0.15s, transform 0.1s;
+}
+.chat-send:hover { background: var(--sage-dark); }
+.chat-send:active { transform: scale(0.93); }
+.chat-send:disabled { background: var(--border2); cursor: not-allowed; }
+.chat-send svg { width: 13px; height: 13px; fill: none; stroke: white; stroke-width: 2; }
+
+
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ── NAV LANGUAGE SWITCHER ── */
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    </div>
+    FairLease
+  </div>
+  <div class="nav-spacer"></div>
+</nav>
+
+<!-- HERO -->
+<main class="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow" id="heroEyebrow">For renters who deserve clarity</div>
+    <h1 class="hero-title" id="heroTitle">Understand your lease<br><span>before you sign it</span></h1>
+    <p class="hero-sub" id="heroSub">Upload your apartment lease and FairLease will detect red flags, explain every clause in plain English, and answer your questions — in your language.</p>
+    </div>
+
+        <div class="upload-zone" id="uploadZone"
+      onclick="document.getElementById('fileInput').click()"
+      ondragover="event.preventDefault(); this.classList.add('dragover')"
+      ondragleave="this.classList.remove('dragover')"
+      ondrop="event.preventDefault(); this.classList.remove('dragover'); handleDrop(event)">
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <polyline points="9 15 12 12 15 15"/>
+        </svg>
+      </div>
+      <div class="upload-label" id="uploadLabel">Drop your lease PDF here</div>
+      <div class="upload-sub" id="uploadSub">or click to browse files</div>
+      <div class="upload-chips">
+        <span class="upload-chip">PDF</span>
+        <span class="upload-chip">Free to use</span>
+        <span class="upload-chip">Private &amp; secure</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<input type="file" id="fileInput" accept=".pdf,application/pdf" onchange="handleFileInput(event)">
+
+<footer class="footer">FairLease — AI-powered tenant protection · Built for renters, not landlords</footer>
+
+<!-- MODAL OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+
+    <div class="modal-header">
+      <div class="modal-header-logo">FairLease</div>
+      <div class="modal-doc-info" id="modalDocInfo">Analyzing your lease...</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="verdict-bar" id="verdictBar" style="display:none">
+      <div class="verdict-badge" id="verdictBadge"></div>
+      <div class="verdict-text" id="verdictText"></div>
+      <div class="verdict-dates" id="verdictDates"></div>
+    </div>
+
+    <div class="modal-body">
+      <div class="clauses-panel" id="clausesPanel">
+        <div class="loading-wrap" id="loadingWrap">
+          <div class="spinner"></div>
+          <div class="loading-label" id="loadingLabel">Reading your lease...</div>
+          <div class="loading-sub" id="loadingSub">This takes about 15–20 seconds</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FLOATING CHAT BUBBLE -->
+<button class="chat-bubble-btn" id="chatBubbleBtn" onclick="toggleChat()">
+  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+  <div class="chat-notif" id="chatNotif"></div>
+</button>
+
+<!-- CHAT WINDOW -->
+<div class="chat-window" id="chatWindow">
+  <div class="chat-win-header">
+    <div class="chat-win-dot"></div>
+    <div class="chat-win-title">Ask about your lease</div>
+    <button class="chat-win-close" onclick="toggleChat()">✕</button>
+  </div>
+
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg msg-ai">Hi! Upload your lease and I'll answer any question about it — in English, 中文, Tiếng Việt, or Español. 👋</div>
+  </div>
+
+  <div class="chat-chips" id="chatChips">
+    <button class="chat-chip" disabled onclick="quickAsk(this.dataset.q)" data-q="Can my friend stay over for a few nights?">🤝 Can my friend stay over?</button>
+    <button class="chat-chip" disabled onclick="quickAsk(this.dataset.q)" data-q="What happens if I need to leave early?">🚪 What if I leave early?</button>
+    <button class="chat-chip" disabled onclick="quickAsk(this.dataset.q)" data-q="Are there any hidden fees I should know about?">💸 Any hidden fees?</button>
+  </div>
+
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" placeholder="Ask anything..." disabled
+      onkeydown="if(event.key==='Enter') sendChat()">
+    <button class="chat-send" id="chatSend" disabled onclick="sendChat()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+// ── API KEY (hardcoded) ────────────────────────────────────────────────────
+// To update: replace the value below with your new Anthropic API key
+const FAIRLEASE_API_KEY = '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';
+function getKey() { return FAIRLEASE_API_KEY; }
+
+let leaseContext = '';
+let clausesSummary = '';
+let chatActive = false;
+let chatOpen = false;
+
+// Severity icons per type
+const SEVERITY_ICONS = {
+  high_risk: '🚨',
+  watch_out: '⚠️',
+  tenant_friendly: '✅',
+};
+
+// Impact icons by common clause types
+function getImpactIcon(title) {
+  const t = title.toLowerCase();
+  if (t.includes('terminat') || t.includes('exit') || t.includes('break')) return '🚪';
+  if (t.includes('fee') || t.includes('charge') || t.includes('cost') || t.includes('admin')) return '💸';
+  if (t.includes('deposit')) return '🏦';
+  if (t.includes('guest') || t.includes('visitor')) return '🤝';
+  if (t.includes('pet')) return '🐾';
+  if (t.includes('renew') || t.includes('auto')) return '🔄';
+  if (t.includes('entry') || t.includes('enter') || t.includes('access')) return '🔑';
+  if (t.includes('subletting') || t.includes('airbnb') || t.includes('sublet')) return '🏠';
+  if (t.includes('maintenance') || t.includes('repair')) return '🔧';
+  if (t.includes('arbitration') || t.includes('dispute') || t.includes('jury')) return '⚖️';
+  if (t.includes('parking')) return '🚗';
+  if (t.includes('insurance')) return '🛡️';
+  return '📋';
+}
+
+// ── API KEY ────────────────────────────────────────────────────────────────
+
+
+// ── LANGUAGE (modal) ────────────────────────────────────────────────────────
+// ── FILE HANDLING ──────────────────────────────────────────────────────────
+function handleDrop(e) { const f = e.dataTransfer.files[0]; if (f) processFile(f); }
+function handleFileInput(e) { const f = e.target.files[0]; if (f) processFile(f); e.target.value = ''; }
+
+async function processFile(file) {
+  if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+    showToast('Please upload a PDF file.', 'error'); return;
+  }
+  const key = getKey();
+  if (!key || key === 'YOUR_KEY_HERE' || key.length < 20) {
+    showToast('⚠️ API key not set. Open this file in a text editor and update FAIRLEASE_API_KEY.', 'error'); return;
+  }
+
+  openModal();
+  document.getElementById('modalDocInfo').textContent = file.name;
+  document.getElementById('verdictBar').style.display = 'none';
+  setLoading(true);
+  disableChat();
+
+  const labels = ['Reading your lease...', 'Detecting red flags...', 'Simplifying clauses...'];
+  let li = 0;
+  const labelInterval = setInterval(() => {
+    li = (li + 1) % labels.length;
+    const el = document.getElementById('loadingLabel');
+    if (el) el.textContent = labels[li];
+  }, 3500);
+
+  const timeoutId = setTimeout(() => {
+    clearInterval(labelInterval);
+    showError('Request timed out after 90 seconds. Check your internet connection and try again.');
+  }, 90000);
+
+  try {
+    const base64 = await toBase64(file);
+
+    const systemPrompt = `You are FairLease, a tenant rights advisor helping renters — especially first-time college students and older adults with no legal background — understand their apartment lease.
+
+Analyze the lease and return ONLY a valid JSON object. No markdown, no explanation outside the JSON.
+
+Use this EXACT schema:
+{
+  "docTitle": "short title",
+  "docType": "Residential Apartment Lease",
+  "leaseStart": "date string or null",
+  "leaseEnd": "date string or null",
+  "overall_score": "fair" | "mixed" | "risky",
+  "summary": "2-sentence plain English verdict. Write like you're texting a friend, not writing a legal brief.",
+  "clauses": [
+    {
+      "id": "c1",
+      "severity": "high_risk" | "watch_out" | "tenant_friendly",
+      "title": "Short clause name (e.g. Early Termination Fee)",
+      "exact_quote": "The exact text from the document, max 180 chars",
+      "plain_english": "Explain this clause in 1-2 SHORT sentences like you're texting a friend. NO legal words. Example: 'If you leave before your lease ends, you owe 2 months rent right away — even if you graduate or move for school.'",
+      "what_it_means_for_you": "One concrete sentence about the real-world impact. Start with 'This means...' Example: 'This means if you move out in May after graduating, you still owe $3,700.'",
+      "is_normal_pct": integer 0-100,
+      "negotiation_tip": "One short practical action. Example: 'Ask the landlord to change this to 1 month, or add a student graduation exception.'"
+    }
+  ]
+}
+
+Flag 5-8 clauses. Focus on: early termination, auto-renewal, late fees, guest limits, subletting, deposit conditions, landlord entry, maintenance, hidden fees, arbitration.
+
+CRITICAL: plain_english and what_it_means_for_you must be written at a 6th-grade reading level. No words like "pursuant", "herein", "liquidated", "material breach". Write like a helpful older sibling explaining the lease.
+
+Respond in English. Write everything in simple, plain language a college student can understand.`;
+
+    let res;
+    try {
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 3000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+              { type: 'text', text: systemPrompt }
+            ]
+          }]
+        })
+      });
+    } catch (networkErr) {
+      throw new Error('Network error — use Chrome and check your internet. (' + networkErr.message + ')');
+    }
+
+    clearInterval(labelInterval);
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      let errMsg = `API error ${res.status}`;
+      try {
+        const errBody = await res.json();
+        errMsg = errBody.error?.message || errMsg;
+        if (res.status === 401) errMsg = 'Invalid API key. Double-check at console.anthropic.com.';
+        if (res.status === 429) errMsg = 'Rate limit hit. Wait a moment and try again.';
+        if (res.status === 400) errMsg = 'PDF may be too large or corrupted. Try a smaller file.';
+      } catch(_) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await res.json();
+    const raw = data.content[0].text;
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('AI returned unexpected format. Try uploading again.');
+
+    let analysis;
+    try { analysis = JSON.parse(match[0]); }
+    catch(e) { throw new Error('Could not parse AI response. Try again.'); }
+
+    if (!analysis.clauses || !Array.isArray(analysis.clauses)) throw new Error('AI response incomplete. Try again.');
+
+    leaseContext = `Document: ${analysis.docTitle}. Term: ${analysis.leaseStart || '?'} to ${analysis.leaseEnd || '?'}. Overall: ${analysis.overall_score}. ${analysis.summary}`;
+    clausesSummary = analysis.clauses.map(c => `• ${c.title} (${c.severity}): ${c.plain_english}`).join('\n');
+
+    renderAnalysis(analysis);
+
+  } catch (err) {
+    clearInterval(labelInterval);
+    clearTimeout(timeoutId);
+    showError(err.message);
+  }
+}
+
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// ── RENDER ANALYSIS ────────────────────────────────────────────────────────
+function renderAnalysis(a) {
+  setLoading(false);
+
+  const vb = document.getElementById('verdictBar');
+  const badge = document.getElementById('verdictBadge');
+  const vtext = document.getElementById('verdictText');
+  const vdates = document.getElementById('verdictDates');
+
+  vb.style.display = 'flex';
+  badge.className = 'verdict-badge ' +
+    (a.overall_score === 'fair' ? 'verdict-fair' : a.overall_score === 'mixed' ? 'verdict-mixed' : 'verdict-risky');
+  badge.textContent = a.overall_score === 'fair' ? '✅ Fair Lease' : a.overall_score === 'mixed' ? '⚠️ Mixed' : '🚨 Risky Lease';
+  vtext.textContent = a.summary;
+  vdates.innerHTML = a.leaseStart && a.leaseEnd
+    ? `<strong>Start:</strong> ${a.leaseStart}<br><strong>End:</strong> ${a.leaseEnd}` : '';
+
+  document.getElementById('modalDocInfo').textContent = `${a.docTitle} · ${a.clauses.length} clauses reviewed`;
+
+  const panel = document.getElementById('clausesPanel');
+  panel.innerHTML = '';
+
+  a.clauses.forEach((c, i) => {
+    const riskClass  = c.severity === 'high_risk' ? 'risk-high'  : c.severity === 'watch_out' ? 'risk-watch' : 'risk-good';
+    const pillClass  = c.severity === 'high_risk' ? 'pill-high'  : c.severity === 'watch_out' ? 'pill-watch' : 'pill-good';
+    const pillLabel  = (SEVERITY_ICONS[c.severity] || '') + ' ' +
+      (c.severity === 'high_risk' ? 'High Risk' : c.severity === 'watch_out' ? 'Watch Out' : 'Tenant-Friendly');
+    const barColor   = c.severity === 'high_risk' ? 'var(--red)' : c.severity === 'watch_out' ? 'var(--amber)' : 'var(--sage)';
+    const icon = getImpactIcon(c.title);
+
+    const card = document.createElement('div');
+    card.className = `clause-card ${riskClass}`;
+    card.style.animationDelay = (i * 0.06) + 's';
+    card.innerHTML = `
+      <div class="clause-top">
+        <span class="severity-pill ${pillClass}">${pillLabel}</span>
+        <span class="clause-title">${icon} ${c.title}</span>
+      </div>
+
+      <div class="clause-meaning">
+        <div class="clause-meaning-label">What this means</div>
+        <div class="clause-meaning-text">${c.plain_english}</div>
+      </div>
+
+      ${c.what_it_means_for_you ? `
+      <div class="clause-impact">
+        <span class="clause-impact-icon">👤</span>
+        <span>${c.what_it_means_for_you}</span>
+      </div>` : ''}
+
+      <div class="normalcy-row">
+        <span class="normalcy-label">How common is this?</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${c.is_normal_pct}%;background:${barColor}"></div></div>
+        <span class="normalcy-pct">${c.is_normal_pct}%</span>
+      </div>
+
+      ${c.negotiation_tip ? `
+      <div class="clause-tip">
+        <span class="clause-tip-icon">💡</span>
+        <span>${c.negotiation_tip}</span>
+      </div>` : ''}
+    `;
+    panel.appendChild(card);
+  });
+
+  enableChat();
+  showChatBubble();
+}
+
+// ── CHAT ───────────────────────────────────────────────────────────────────
+function showChatBubble() {
+  document.getElementById('chatBubbleBtn').classList.add('visible');
+  // Show notification dot after 2s to hint user
+  setTimeout(() => {
+    if (!chatOpen) document.getElementById('chatNotif').classList.add('show');
+  }, 2000);
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chatWindow').classList.toggle('open', chatOpen);
+  if (chatOpen) {
+    document.getElementById('chatNotif').classList.remove('show');
+    if (leaseContext) document.getElementById('chatInput').focus();
+  }
+}
+
+function enableChat() {
+  document.getElementById('chatInput').disabled = false;
+  
+  document.getElementById('chatSend').disabled = false;
+  document.querySelectorAll('.chat-chip').forEach(c => c.disabled = false);
+  addMsg("I've read your lease! Ask me anything in English, 中文, Tiếng Việt, or Español 🌐", 'ai');
+}
+
+function disableChat() {
+  document.getElementById('chatInput').disabled = true;
+  document.getElementById('chatSend').disabled = true;
+  document.querySelectorAll('.chat-chip').forEach(c => c.disabled = true);
+}
+
+async function quickAsk(q) { if (!chatActive) await runChat(q); }
+async function sendChat() {
+  if (chatActive) return;
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim(); if (!q) return;
+  input.value = '';
+  await runChat(q);
+}
+
+async function runChat(question) {
+  const key = getKey();
+  if (!key) { addMsg('Please add your API key first.', 'err'); return; }
+  if (!leaseContext) { addMsg('Please upload a lease first.', 'err'); return; }
+
+  chatActive = true;
+  document.getElementById('chatInput').disabled = true;
+  document.getElementById('chatSend').disabled = true;
+  addMsg(question, 'user');
+  showTyping();
+
+  const prompt = `You are FairLease, a friendly tenant advisor. Be like a helpful older sibling — warm, direct, simple. NO legal jargon.
+
+Lease context: ${leaseContext}
+
+Key clauses: ${clausesSummary}
+
+Rules:
+- Answer in 2-4 short sentences max
+- Use the specific lease info above
+- Cite the clause name if relevant
+- Detect the language the user writes in and respond in THAT language
+- Respond in English. Keep it simple and friendly.
+- Never say "pursuant to", "herein", "liquidated damages", or other legal terms
+
+Tenant question: ${question}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 350,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    hideTyping();
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const data = await res.json();
+    addMsg(data.content[0].text, 'ai');
+  } catch (err) {
+    hideTyping();
+    addMsg('Error: ' + err.message, 'err');
+  } finally {
+    chatActive = false;
+    document.getElementById('chatInput').disabled = false;
+    document.getElementById('chatSend').disabled = false;
+    document.getElementById('chatInput').focus();
+  }
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function addMsg(text, type) {
+  const msgs = document.getElementById('chatMsgs');
+  const d = document.createElement('div');
+  d.className = `msg msg-${type}`;
+  d.textContent = text;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function showTyping() {
+  const msgs = document.getElementById('chatMsgs');
+  const d = document.createElement('div');
+  d.className = 'typing'; d.id = 'typing';
+  d.innerHTML = '<span></span><span></span><span></span>';
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function hideTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+
+function setLoading(on) {
+  const panel = document.getElementById('clausesPanel');
+  if (on) {
+    const lbl = 'Reading your lease...';
+    panel.innerHTML = `
+      <div class="loading-wrap" id="loadingWrap">
+        <div class="spinner"></div>
+        <div class="loading-label" id="loadingLabel">${lbl}</div>
+        <div class="loading-sub" id="loadingSub">This takes about 15–20 seconds</div>
+      </div>`;
+  }
+}
+
+function showError(msg) {
+  document.getElementById('clausesPanel').innerHTML = `
+    <div class="loading-wrap">
+      <div style="font-size:36px">⚠️</div>
+      <div class="loading-label" style="color:var(--red)">Something went wrong</div>
+      <div class="loading-sub" style="text-align:center;max-width:300px;line-height:1.6">${msg}</div>
+      <button onclick="closeModal()" style="margin-top:12px;padding:8px 20px;border-radius:20px;border:1px solid var(--border2);background:white;cursor:pointer;font-family:inherit;font-size:13px;color:var(--text2)">← Try again</button>
+    </div>`;
+}
+
+function showToast(msg, type) {
+  const old = document.getElementById('toast'); if (old) old.remove();
+  const toast = document.createElement('div');
+  toast.id = 'toast'; toast.textContent = msg;
+  Object.assign(toast.style, {
+    position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
+    background: type === 'error' ? 'var(--red)' : 'var(--sage)',
+    color:'white', padding:'10px 20px', borderRadius:'20px', fontSize:'13px',
+    fontFamily:'DM Sans, sans-serif', boxShadow:'0 4px 16px rgba(0,0,0,0.2)',
+    zIndex:'999', maxWidth:'400px', textAlign:'center',
+  });
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function openModal() { document.getElementById('overlay').classList.add('open'); }
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('chatBubbleBtn').classList.remove('visible');
+  document.getElementById('chatWindow').classList.remove('open');
+  chatOpen = false;
+  leaseContext = '';
+  clausesSummary = '';
+  disableChat();
+  document.getElementById('chatMsgs').innerHTML = '<div class="msg msg-ai">Hi! Upload your lease and I\'ll answer any question about it — in English, 中文, Tiếng Việt, or Español. 👋</div>';
+}
+</script>
+</body>
+</html>
